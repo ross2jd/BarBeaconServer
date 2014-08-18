@@ -1,4 +1,7 @@
 <?php
+// We need to set the content type to application/json for the AFNetworking to
+// work properly.
+header('Content-type: application/json');
 include_once 'Classes/LogInManager.php';
 // $db = new DatabaseManager();
 // $db->connect();
