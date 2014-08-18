@@ -3,6 +3,7 @@
 // work properly.
 header('Content-type: application/json');
 include_once 'Classes/LogInManager.php';
+include_once 'Classes/Status.php';
 // $db = new DatabaseManager();
 // $db->connect();
 // $requestUsername = "cfrosty13";
@@ -17,21 +18,21 @@ include_once 'Classes/LogInManager.php';
 // print_r($result);
 
 // Under testing
+$logInManager = new LogInManager();
 if (array_key_exists('username', $_GET) && array_key_exists('password', $_GET))
 {
     $username = $_GET['username'];
     $password = $_GET['password'];
-    $logInManager = new LogInManager();
     $result = $logInManager->login($username, $password);
     if ($result)
-        echo $logInManager->createJSONResponse();
+        $logInManager->status->setStatusCode(Status::SUCCESS);
     else
-        echo "Failed!";
-    unset($logInManager);
+        $logInManager->status->setStatusCodeWithMessage(Status::ERROR, "Authentication failed!");
 }
 else
 {
-    echo "Failed!";
+    $logInManager->status->setStatusCodeWithMessage(Status::ERROR, "Username and/or password not provided");
 }
-
+echo $logInManager->createJSONResponse();
+unset($logInManager);
 ?>

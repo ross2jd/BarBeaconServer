@@ -117,12 +117,10 @@ class Profile
     public function membersToJsonFormat()
     {
         $jsonFormat = array(
-            'Profile' => array(
-                array(
-                    'username' => $this->username,
-                    'password' => $this->password,
-                    'name' => $this->name
-                )
+            array(
+                'username' => $this->username,
+                'password' => $this->password,
+                'name' => $this->name
             )
         );
         return $jsonFormat;

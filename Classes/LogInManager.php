@@ -1,5 +1,6 @@
 <?php
 include_once 'Profile.php';
+include_once 'Status.php';
 
 /**
  * Class: LogInManager
@@ -14,6 +15,9 @@ class LogInManager
     /// The profile of the user to login
     private $user;
     
+    /// The status object for the manager
+    public $status;
+    
     ///////////////////////////////////////////////////////////////////////////
     /// Constructor
     ///
@@ -21,6 +25,7 @@ class LogInManager
     function __construct()
     {
         $this->user = new Profile();
+        $this->status = new Status();
     }
     
     ///////////////////////////////////////////////////////////////////////////
@@ -65,12 +70,25 @@ class LogInManager
     /// createJSONResponse()
     ///
     /// This method will return the JSON response to output so that the iPhone
-    /// application can pase the profile along with a status/error object.
+    /// application can parse the profile along with status object. If the
+    /// operation was not successul (i.e. the status object holds anything but
+    /// SUCCESS) then it will only send the error object.
     ///////////////////////////////////////////////////////////////////////////
     public function createJSONResponse()
     {
-        // TODO: More to happen here. We need to add an error object passback as well.
-        return json_encode($this->user->membersToJsonFormat());
+        $json_array = array();
+        if ($this->status->getCode() != Status::SUCCESS)
+        {
+            // The operation failed. Send only the error
+            $json_array['Status'] = $this->status->membersToJsonFormat();
+        }
+        else
+        {
+            // Send the profile and the error
+            $json_array['Profile'] = $this->user->membersToJsonFormat();
+            $json_array['Status'] = $this->status->membersToJsonFormat();
+        }
+        return json_encode($json_array);
     }
 }
 ?>
