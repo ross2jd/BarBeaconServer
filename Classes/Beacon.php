@@ -1,22 +1,21 @@
 <?php
+include_once 'Location.php';
+
 /**
- * Class: Location
+ * Class: Beacon
  *
  * Author: Jordan Ross
  * 
  * Version History:
- * 8/13/14 - Created.
+ * 8/19/14 - Created.
  */
-class Location
+class Beacon
 {
-    /// The x coordinate of the location
-    private $x_coordinate;
+    // The unique identifier of the beacon
+    private $uuid;
     
-    /// The y coordinate of the location
-    private $y_coordinate;
-    
-    /// The bar id of the location
-    private $barId;
+    // The location of the beacon
+    private $location;
     
     ///////////////////////////////////////////////////////////////////////////
     /// Constructor
@@ -24,15 +23,27 @@ class Location
     ///////////////////////////////////////////////////////////////////////////
     function __construct()
     {
-        $this->x_coordinate = 0.0;
-        $this->y_coordinate = 0.0;
+        $this->uuid = "";
+        $this->location = new Location();
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// setUUID()
+    ///
+    /// The method will set the uuid of the beacon.
+    ///
+    /// @param $requestUUID The uuid to set to.
+    ///////////////////////////////////////////////////////////////////////////
+    public function setUUID($requestUUID)
+    {
+        $this->uuid = $requestUUID;
     }
     
     ///////////////////////////////////////////////////////////////////////////
     /// setLocationWithCoordinatesAndMapId()
     ///
-    /// The method will set the members using an x coordinate, y coordinate, 
-    /// and the bar id.
+    /// The method will set the location of the beacon using an x coordinate,
+    /// y coordinate, and the bar id.
     ///
     /// @param $x The x coordinate of the location.
     /// @param $y The y coordinate of the location.
@@ -40,10 +51,9 @@ class Location
     ///////////////////////////////////////////////////////////////////////////
     public function setLocationWithCoordinatesAndMapId($x, $y, $mapId)
     {
-        $this->x_coordinate = $x;
-        $this->y_coordinate = $y;
-        $this->barId = $mapId;
+        $this->location->setLocationWithCoordinatesAndMapId($x, $y, $mapId);
     }
+    
     
     ///////////////////////////////////////////////////////////////////////////
     /// membersToJsonFormat()
@@ -55,9 +65,8 @@ class Location
     {
         $jsonFormat = array(
             array(
-                'x_coor' => $this->x_coordinate,
-                'y_coor' => $this->y_coordinate,
-                'bar_id' => $this->barId
+                'UUID' => $this->uuid,
+                'location' => $this->location->membersToJsonFormat()
             )
         );
         return $jsonFormat;
