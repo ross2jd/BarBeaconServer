@@ -140,6 +140,7 @@ class Map
             {
                 $tempBeacon = new Beacon();
                 $tempBeacon->setUUID($result[$i]['uuid']);
+                $tempBeacon->setMinor($result[$i]['minor']);
                 $tempBeacon->setLocationWithCoordinatesAndMapId($result[$i]['location_x'], $result[$i]['location_y'], $result[$i]['placed_bar_id']);
                 array_push($this->beacons, $tempBeacon);
                 // unset($tempBeacon);

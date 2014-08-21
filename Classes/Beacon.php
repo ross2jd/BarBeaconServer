@@ -14,6 +14,9 @@ class Beacon
     // The unique identifier of the beacon
     private $uuid;
     
+    // The minor identifier of the beacon
+    private $minor;
+    
     // The location of the beacon
     private $location;
     
@@ -24,6 +27,7 @@ class Beacon
     function __construct()
     {
         $this->uuid = "";
+        $this->minor = "";
         $this->location = new Location();
     }
     
@@ -37,6 +41,18 @@ class Beacon
     public function setUUID($requestUUID)
     {
         $this->uuid = $requestUUID;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// setMinor()
+    ///
+    /// The method will set the minor member of the beacon.
+    ///
+    /// @param $requestMinor The minor value to set to.
+    ///////////////////////////////////////////////////////////////////////////
+    public function setMinor($requestMinor)
+    {
+        $this->minor = $requestMinor;
     }
     
     ///////////////////////////////////////////////////////////////////////////
@@ -66,6 +82,7 @@ class Beacon
         $jsonFormat = array(
             array(
                 'UUID' => $this->uuid,
+                'minor' => $this->minor,
                 'location' => $this->location->membersToJsonFormat()
             )
         );
