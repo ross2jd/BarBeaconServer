@@ -1,5 +1,6 @@
 <?php
 include_once 'Location.php';
+include_once 'Friend.php';
 include_once 'DatabaseManager.php';
 
 /**
@@ -48,7 +49,7 @@ class Profile
     /// This method will load the members of the Profile class from the database
     /// based on the username supplied to the method.
     ///
-    /// @param username The username of the profile to load.
+    /// @param requestUsername The username of the profile to load.
     ///
     /// @return bool
     ///     @retval true - Profile loaded successfully.
@@ -89,6 +90,51 @@ class Profile
     }
     
     ///////////////////////////////////////////////////////////////////////////
+    /// loadFriends()
+    ///
+    /// This method will populate the friends array with a Friend object for
+    /// each friend.
+    ///
+    /// @param requestUsername The username of the profile to load.
+    ///
+    /// @return bool
+    ///     @retval true - Friends loaded successfully.
+    ///     @retval false - Friends load failed OR there are no friends.
+    ///////////////////////////////////////////////////////////////////////////
+    public function loadFriends($requestUsername)
+    {
+        if (strlen($requestUsername) > 0)
+        {
+            // The username is not null so search the DB.
+            $this->db = new DatabaseManager();
+            $this->db->connect();
+            $sql = 'SELECT name FROM profile WHERE username IN ( SELECT friend_username FROM friends WHERE username="'.$requestUsername.'" )';
+            $this->db->query($sql);
+            $result = $this->db->getResult();
+            $numResults = $this->db->numRows();
+            $this->db->disconnect();
+            if ($numResults >= 1)
+            {
+                for ($i = 0; $i < count($result); $i++)
+                {
+                    array_push($this->friends, new Friend($result[$i]['name']));
+                }       
+                return true;
+            }
+            else
+            {
+                // There are no friends for the user or it failed.
+                return false;
+            }
+            
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
     /// getUsername()
     ///
     /// Getter method for username.
@@ -116,11 +162,18 @@ class Profile
     ///////////////////////////////////////////////////////////////////////////
     public function membersToJsonFormat()
     {
+        $json_friends = array();
+        for ($i = 0; $i < count($this->friends); $i++)
+        {
+            $json_friends['Friend'.$i] = $this->friends[$i]->membersToJsonFormat();
+        }
+        
         $jsonFormat = array(
             array(
                 'username' => $this->username,
                 'password' => $this->password,
-                'name' => $this->name
+                'name' => $this->name,
+                'friends' => $json_friends
             )
         );
         return $jsonFormat;

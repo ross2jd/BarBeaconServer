@@ -51,6 +51,7 @@ class LogInManager
             $correctPassword = $this->user->getPassword();
             if ($correctPassword == $password)
             {
+                $this->user->loadFriends($username);
                 return true;
             }
             else
