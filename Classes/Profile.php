@@ -108,7 +108,7 @@ class Profile
             // The username is not null so search the DB.
             $this->db = new DatabaseManager();
             $this->db->connect();
-            $sql = 'SELECT name FROM profile WHERE username IN ( SELECT friend_username FROM friends WHERE username="'.$requestUsername.'" )';
+            $sql = 'SELECT name, username FROM profile WHERE username IN ( SELECT friend_username FROM friends WHERE username="'.$requestUsername.'" )';
             $this->db->query($sql);
             $result = $this->db->getResult();
             $numResults = $this->db->numRows();
@@ -117,7 +117,7 @@ class Profile
             {
                 for ($i = 0; $i < count($result); $i++)
                 {
-                    array_push($this->friends, new Friend($result[$i]['name']));
+                    array_push($this->friends, new Friend($result[$i]['name'], $result[$i]['username']));
                 }       
                 return true;
             }
@@ -198,6 +198,42 @@ class Profile
         else
         {
             return 5;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// removeFriend()
+    ///
+    /// This method will attempt to remove a friend to the requested users profile.
+    ///
+    /// @param $requestProfile  The username for the requested profile.
+    /// @param $requestFriend   The username for the friend to remove.
+    ///
+    /// @return int
+    ///     @retval 1 - Friend added successfuly
+    ///     @retval 2 - Query failed.
+    ///     @retval 3 - Bot profile and friend profile not provided.
+    ///////////////////////////////////////////////////////////////////////////
+    public function removeFriend($requestProfile, $requestFriend)
+    {
+        if (strlen($requestProfile) > 0 && strlen($requestFriend) > 0) 
+        {
+            // The parameters are not null so search the friends table to make sure they are not already friends.
+            $this->db = new DatabaseManager();
+            $this->db->connect();
+            $sql = 'DELETE FROM friends WHERE username="'.$requestProfile.'" AND friend_username="'.$requestFriend.'"';
+            if (!$this->db->deleteQuery($sql))
+            {
+                // The query failed
+                $this->db->disconnect();
+                return 2;
+            }
+            $this->db->disconnect();
+            return 1;
+        }
+        else
+        {
+            return 3;
         }
     }
     

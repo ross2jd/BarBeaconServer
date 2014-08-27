@@ -12,6 +12,9 @@ class Friend
     /// The name of the friend
     private $name;
     
+    // The username of the friend
+    private $username;
+    
     /// The last known location of the friend
     private $curLocation;
     
@@ -19,9 +22,10 @@ class Friend
     /// Constructor
     ///
     ///////////////////////////////////////////////////////////////////////////
-    function __construct($friendName)
+    function __construct($friendName, $friendUsername)
     {
         $this->name = $friendName;
+        $this->username = $friendUsername;
         $this->curLocation = new Location();
     }
     
@@ -47,7 +51,8 @@ class Friend
     {
         $jsonFormat = array(
             array(
-                'name' => $this->name
+                'name' => $this->name,
+                'username' => $this->username
             )
         );
         return $jsonFormat;

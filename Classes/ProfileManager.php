@@ -30,6 +30,7 @@ class ProfileManager
     {
         $this->user = new Profile();
         $this->status = new Status();
+        $this->friend = new Friend("","");
     }
     
     ///////////////////////////////////////////////////////////////////////////
@@ -53,7 +54,7 @@ class ProfileManager
             $this->status->setStatusCode(Status::SUCCESS);
             $friendProfile = new Profile();
             $friendProfile->loadProfile($requestFriend);
-            $this->friend = new Friend($friendProfile->getName());
+            $this->friend = new Friend($friendProfile->getName(), $friendProfile->getUsername());
             unset($friendProfile);
             return true;
         } elseif ($returnCode == 2) {
@@ -63,6 +64,33 @@ class ProfileManager
             $this->status->setStatusCodeWithMessage(Status::ERROR, "User does not exist!");
             return false;
         } elseif ($returnCode == 4) {
+            $this->status->setStatusCodeWithMessage(Status::ERROR, "Database Error!");
+            return false;
+        } else {
+            $this->status->setStatusCodeWithMessage(Status::ERROR, "No username provided!");
+            return false;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// removeFriend()
+    ///
+    /// This method will remove a friend from the user profile if successful.
+    ///
+    /// @param $requestProfile  The username for the requested profile.
+    /// @param $requestFriend   The username for the friend to remove.
+    ///
+    /// @return bool
+    ///     @retval true - Friend removed successfuly
+    ///     @retval false - Friend not removed.
+    ///////////////////////////////////////////////////////////////////////////
+    public function removeFriend($requestProfile, $requestFriend)
+    {
+        $returnCode = $this->user->removeFriend($requestProfile, $requestFriend);
+        if ($returnCode == 1) {
+            $this->status->setStatusCode(Status::SUCCESS);
+            return true;
+        } elseif ($returnCode == 2) {
             $this->status->setStatusCodeWithMessage(Status::ERROR, "Database Error!");
             return false;
         } else {
