@@ -26,6 +26,18 @@ class Friend
     }
     
     ///////////////////////////////////////////////////////////////////////////
+    /// setName()
+    ///
+    /// This method will set the name for the friend
+    /// 
+    /// @param $newName Name to set as.
+    ///////////////////////////////////////////////////////////////////////////
+    public function setName($newName)
+    {
+        $this->name = $newName;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
     /// membersToJsonFormat()
     ///
     /// This method will prepare the members we want into a format we can

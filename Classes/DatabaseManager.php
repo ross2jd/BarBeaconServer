@@ -132,6 +132,29 @@ class DatabaseManager
     }
     
     ///////////////////////////////////////////////////////////////////////////
+    /// insertQuery()
+    ///
+    /// This method takes an insert SQL statement and attempts to execute it. 
+    /// If it fails then it will store the error message;
+    ///
+    /// @param $sql The SQL statement to execute
+    ///
+    /// @return bool
+    ///     @retval true - The query was successful.
+    ///     @retval false - The query failed.
+    ///////////////////////////////////////////////////////////////////////////
+    public function insertQuery($sql)
+    {
+        $query = mysqli_query($this->con, $sql);
+        if (!$query) {
+    		array_push($this->result,mysqli_error($this->con));
+            mysqli_free_result($query);
+    		return false; // Insert failed!
+        }
+        return true;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
     /// getResult()
     ///
     /// This method will retrieve the result stored in the result member.

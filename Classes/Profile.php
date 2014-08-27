@@ -135,6 +135,73 @@ class Profile
     }
     
     ///////////////////////////////////////////////////////////////////////////
+    /// addFriend()
+    ///
+    /// This method will attempt to add a friend to the requested users profile.
+    ///
+    /// @param $requestProfile  The username for the requested profile.
+    /// @param $requestFriend   The username for the friend to add.
+    ///
+    /// @return int
+    ///     @retval 1 - Friend added successfuly
+    ///     @retval 2 - Requested friend is already a friend.
+    ///     @retval 3 - Requested friend does not exist
+    ///     @retval 4 - Query failed.
+    ///     @retval 5 - Bot profile and friend profile not provided.
+    ///////////////////////////////////////////////////////////////////////////
+    public function addFriend($requestProfile, $requestFriend)
+    {
+        if (strlen($requestProfile) > 0 && strlen($requestFriend) > 0) 
+        {
+            // The parameters are not null so search the friends table to make sure they are not already friends.
+            $this->db = new DatabaseManager();
+            $this->db->connect();
+            $sql = 'SELECT friend_username FROM friends WHERE username="'.$requestProfile.'"';
+            $this->db->query($sql);
+            $result = $this->db->getResult();
+            $numResults = $this->db->numRows();
+            
+            // Search the friends of the user for exisitng friendship
+            for ($i = 0; $i < count($result); $i++)
+            {
+                if ($result[$i]['friend_username'] == $requestFriend)
+                {
+                    // The requested friend is already a friend of the user.
+                    $this->db->disconnect();
+                    return 2;
+                }
+            }
+            
+            // Check to make sure the requested friend exists!
+            $sql = 'SELECT name FROM profile WHERE username="'.$requestFriend.'"';
+            $this->db->query($sql);
+            $result = $this->db->getResult();
+            $numResults = $this->db->numRows();
+            if ($numResults == 0)
+            {
+                // There is no profile with the requested username.
+                $this->db->disconnect();
+                return 3;
+            }
+            
+            // If we get here we are safe to add the friend to the user profile
+            $sql = 'INSERT INTO friends (username, friend_username) VALUES ("'.$requestProfile.'","'.$requestFriend.'")';
+            if (!$this->db->insertQuery($sql))
+            {
+                // The query failed
+                $this->db->disconnect();
+                return 4;
+            }
+            $this->db->disconnect();
+            return 1;
+        }
+        else
+        {
+            return 5;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
     /// getUsername()
     ///
     /// Getter method for username.
@@ -152,6 +219,16 @@ class Profile
     public function getPassword()
     {
         return $this->password;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// getPassword()
+    ///
+    /// Getter method for the name.
+    ///////////////////////////////////////////////////////////////////////////
+    public function getName()
+    {
+        return $this->name;
     }
     
     ///////////////////////////////////////////////////////////////////////////
