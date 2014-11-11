@@ -112,18 +112,25 @@ class Profile
             $this->db->query($sql);
             $result = $this->db->getResult();
             $numResults = $this->db->numRows();
-            $this->db->disconnect();
             if ($numResults >= 1)
             {
                 for ($i = 0; $i < count($result); $i++)
                 {
-                    array_push($this->friends, new Friend($result[$i]['name'], $result[$i]['username']));
-                }       
+                    $newFriend = new Friend($result[$i]['name'], $result[$i]['username']);
+                    $loc_sql = 'SELECT * FROM location WHERE username="'.$result[$i]['username'].'"';
+                    $this->db->query($loc_sql);
+                    $loc_result = $this->db->getResult(); // There will be only 1 result in the table since the username is the primary key
+                    $newFriend->setLocation($loc_result[0]['location_x'], $loc_result[0]['location_y'], $loc_result[0]['bar_id']);
+                    array_push($this->friends, $newFriend);
+                    unset($newFriend);
+                }
+                $this->db->disconnect();       
                 return true;
             }
             else
             {
                 // There are no friends for the user or it failed.
+                $this->db->disconnect();
                 return false;
             }
             
@@ -212,7 +219,7 @@ class Profile
     /// @return int
     ///     @retval 1 - Friend added successfuly
     ///     @retval 2 - Query failed.
-    ///     @retval 3 - Bot profile and friend profile not provided.
+    ///     @retval 3 - BotH profile and friend profile not provided.
     ///////////////////////////////////////////////////////////////////////////
     public function removeFriend($requestProfile, $requestFriend)
     {
@@ -223,6 +230,44 @@ class Profile
             $this->db->connect();
             $sql = 'DELETE FROM friends WHERE username="'.$requestProfile.'" AND friend_username="'.$requestFriend.'"';
             if (!$this->db->deleteQuery($sql))
+            {
+                // The query failed
+                $this->db->disconnect();
+                return 2;
+            }
+            $this->db->disconnect();
+            return 1;
+        }
+        else
+        {
+            return 3;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// updateLocation()
+    ///
+    /// This method will attempt to update the users location in the database.
+    ///
+    /// @param $username  The username for the profile to update.
+    /// @param $x_coordinate   The x coordinate of the user.
+    /// @param $y_coordinate   The y coordinate of the user.
+    /// @param $barID   The id of the bar that the user is currently in.
+    ///
+    /// @return int
+    ///     @retval 1 - Location updated successfuly
+    ///     @retval 2 - Query failed.
+    ///     @retval 3 - Username and coordinates not provided.
+    ///////////////////////////////////////////////////////////////////////////
+    public function updateLocation($username, $x_coordinate, $y_coordinate, $barID)
+    {
+        if (strlen($username) > 0) 
+        {
+            // The parameters are not null so search the friends table to make sure they are not already friends.
+            $this->db = new DatabaseManager();
+            $this->db->connect();
+            $sql = 'UPDATE location SET location_x='.$x_coordinate.', location_y='.$y_coordinate.', bar_id='.$barID.' WHERE username="'.$username.'"';
+            if (!$this->db->updateQuery($sql))
             {
                 // The query failed
                 $this->db->disconnect();
@@ -265,6 +310,16 @@ class Profile
     public function getName()
     {
         return $this->name;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// getFriends()
+    ///
+    /// Getter method for friends list.
+    ///////////////////////////////////////////////////////////////////////////
+    public function getFriends()
+    {
+        return $this->friends;
     }
     
     ///////////////////////////////////////////////////////////////////////////

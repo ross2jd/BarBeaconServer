@@ -42,6 +42,19 @@ class Friend
     }
     
     ///////////////////////////////////////////////////////////////////////////
+    /// setLocation()
+    ///
+    /// This method will set the current location for the friend
+    /// 
+    /// @param $x_location  x location to set as.
+    /// @param $y_location  y location to set as.
+    /// @param $barID   bar ID to set as
+    ///////////////////////////////////////////////////////////////////////////
+    public function setLocation($x_location, $y_location, $barID) {
+        $this->curLocation->setLocationWithCoordinatesAndMapId($x_location, $y_location, $barID);
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
     /// membersToJsonFormat()
     ///
     /// This method will prepare the members we want into a format we can
@@ -52,7 +65,8 @@ class Friend
         $jsonFormat = array(
             array(
                 'name' => $this->name,
-                'username' => $this->username
+                'username' => $this->username,
+                'location' => $this->curLocation->membersToJsonFormat()
             )
         );
         return $jsonFormat;

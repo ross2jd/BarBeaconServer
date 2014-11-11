@@ -172,7 +172,30 @@ class DatabaseManager
         if (!$query) {
     		array_push($this->result,mysqli_error($this->con));
             mysqli_free_result($query);
-    		return false; // Insert failed!
+    		return false; // Delete failed!
+        }
+        return true;
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// updateQuery()
+    ///
+    /// This method takes an upddate SQL statement and attempts to execute it. 
+    /// If it fails then it will store the error message;
+    ///
+    /// @param $sql The SQL statement to execute
+    ///
+    /// @return bool
+    ///     @retval true - The query was successful.
+    ///     @retval false - The query failed.
+    ///////////////////////////////////////////////////////////////////////////
+    public function updateQuery($sql)
+    {
+        $query = mysqli_query($this->con, $sql);
+        if (!$query) {
+    		array_push($this->result,mysqli_error($this->con));
+            mysqli_free_result($query);
+    		return false; // Update failed!
         }
         return true;
     }

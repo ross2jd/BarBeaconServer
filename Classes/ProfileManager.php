@@ -10,6 +10,7 @@ include_once 'Friend.php';
  * 
  * Version History:
  * 8/26/14 - Created.
+ * 11/11/14 - Added updating locations.
  */
 class ProfileManager
 {
@@ -22,6 +23,9 @@ class ProfileManager
     /// The friend object for a recently added friend.
     public $friend;
     
+    /// An array of all of our friends locations
+    private $friend_locations;
+    
     ///////////////////////////////////////////////////////////////////////////
     /// Constructor
     ///
@@ -31,6 +35,7 @@ class ProfileManager
         $this->user = new Profile();
         $this->status = new Status();
         $this->friend = new Friend("","");
+        $this->friend_locations = array();
     }
     
     ///////////////////////////////////////////////////////////////////////////
@@ -100,6 +105,71 @@ class ProfileManager
     }
     
     ///////////////////////////////////////////////////////////////////////////
+    /// updateUserLocation()
+    ///
+    /// This method will update the location of the user in the database if
+    /// successful.
+    ///
+    /// @param $username  The username of the profile being updated.
+    /// @param $x_location The x coordinate of the profile to update to.
+    /// @param $y_location The y coordinate of the profile to update to.
+    /// @param $barID   The id of the bar that the user is currently in.
+    ///
+    /// @return bool
+    ///     @retval true - User location updated successfuly
+    ///     @retval false - User location was not updated.
+    ///////////////////////////////////////////////////////////////////////////
+    public function updateUserLocation($username, $x_coordinate, $y_coordinate, $barID)
+    {
+        // We want to call down to the user profile and have it update the users location and
+        // check the response.
+        $returnCode = $this->user->updateLocation($username, $x_coordinate, $y_coordinate, $barID);
+        if ($returnCode == 1) {
+            $this->status->setStatusCode(Status::SUCCESS);
+            return true;
+        } elseif ($returnCode == 2) {
+            $this->status->setStatusCodeWithMessage(Status::ERROR, "Database Error!");
+            return false;
+        } else {
+            // We should never get this error since we are providing the parameters and is not based
+            // on user interaction
+            $this->status->setStatusCodeWithMessage(Status::ERROR, "Failed to update location!");
+            return false;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    /// retrieveFriendLocations()
+    ///
+    /// This method will populate our friend_locations array with the current
+    /// location of all of the provided users friends..
+    ///
+    /// @param $username  The username of the profile being updated.
+    /// @param $x_location The x coordinate of the profile to update to.
+    /// @param $y_location The y coordinate of the profile to update to.
+    ///
+    /// @return bool
+    ///     @retval true - User location updated successfuly
+    ///     @retval false - User location was not updated.
+    ///////////////////////////////////////////////////////////////////////////
+    public function retrieveFriendLocations($username)
+    {
+        // We simply just need to load the friends list since we update the location as
+        // part of this method.
+        $returnCode = $this->user->loadFriends($username);
+        
+        if ($returnCode) {
+            $this->status->setStatusCode(Status::SUCCESS);
+            return true;
+        } else {
+            // We should never get this error since we are providing the parameters and is not based
+            // on user interaction
+            $this->status->setStatusCodeWithMessage(Status::ERROR, "Failed to retrieve friend locations!");
+            return false;
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////
     /// createJSONResponse()
     ///
     /// This method will return the JSON response to output so that the iPhone
@@ -117,7 +187,7 @@ class ProfileManager
         }
         else
         {
-            // Send the profile and the error
+            // Send the profile, friend, friend locations, and the error
             $json_array['Profile'] = $this->user->membersToJsonFormat();
             $json_array['Status'] = $this->status->membersToJsonFormat();
             $json_array['Friend'] = $this->friend->membersToJsonFormat();
